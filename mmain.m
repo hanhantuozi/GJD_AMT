@@ -53,7 +53,7 @@ K_d = cos(theta_g)^2*r_g^2*(1/J_se+1/J_ce)+sin(theta_g)^2/m_slv;
 %% --------- collision ----------
 kesi = 0.3; %泊松恢复系数
 K_con = 1.07e7;
-D_con = 1e3;
+D_con = 1e2;
 mu_con = 0.3;
 
 sum_e = 0;
