@@ -23,6 +23,5 @@ Bw_1 = [zeros(3,2);B2_1];
 
 S1 = A_1*s + Bu_1*[0;0]+Bw_1*[0;0];
 %%
-% data_save=[data_save;t];
-% data_save=[data_save;t,Ffork,Fslspx,Fslspy,Fxsrsl,Nsr_str,h,Tsi_sr,Tstr_sr,tempd,S,fc,stage,Fyisl,Tsl_i];
+% data_save=[data_save;s,t];
 end
