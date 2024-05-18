@@ -1,4 +1,4 @@
-function mmain
+function main_p2
 clc
 clear all
 close all
@@ -28,10 +28,10 @@ ig = 20; % 末端减速比
 
 %% --------- mass --------- 
 m_slv = 2.543;
-J_se = 0.022; % 待定，应该加上转子和输出轴的总的转动惯量？？
-J_re = 0.012;
+J_se = 0.122; % 待定，应该加上转子和输出轴的总的转动惯量？？
+J_re = 0.112;
 J_ce = 1.528;
-J_p = 0.01;
+J_p = 0.02;
 
 % for N stage
 Jx1 = J_re+(R_r^2)/4/(R_c^2)*J_ce+N*(R_r^2)/4/(R_p^2)*J_p;
@@ -99,7 +99,7 @@ co = [0 0 1;
 set(groot,'defaultAxesColorOrder',co);
 set(0,'DefaultLineLineWidth',1.5);
 %------------------------------Plots----------------------------------
-save test_p2
+save ./data/test_p2
 
 figure(1);
 subplot(3,1,1); %

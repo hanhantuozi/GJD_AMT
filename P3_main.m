@@ -1,4 +1,4 @@
-function mmain
+function main_p3
 clc
 clear all
 close all
@@ -6,7 +6,7 @@ close all
 global m_slv J_se J_re J_ce J_p R_s R_r R_p R_c r_g P1 P2...
     c_slv theta_g N N_h k ig kesi K_con D_con mu_con Jx1 Jx2...
     Jx3 Jx4 Jx Lrs1 Lrs3 Lrs3 Lrs4 Lcp1 Lcp2 Lcp3 Lcp4 K_d...
-    data_save sum_e last_e
+    data_save sum_e last_e n_colis ddel0
 
 %% --------- geometry ---------
 R_s = 36.76e-3;   % 太阳轮
@@ -16,7 +16,7 @@ R_c = (R_r+R_s)/2;% 桁架
 r_g = R_r; 
 
 P1 = 0.02-0.002;
-P2 = 0.02;
+P2 = 0.022;
 
 c_slv = 1;
 theta_g = 0.70;
@@ -28,10 +28,10 @@ ig = 20; % 末端减速比
 
 %% --------- mass --------- 
 m_slv = 2.543;
-J_se = 0.022; % 待定，应该加上转子和输出轴的总的转动惯量？？
-J_re = 0.012;
+J_se = 0.122; % 待定，应该加上转子和输出轴的总的转动惯量？？
+J_re = 0.112;
 J_ce = 1.528;
-J_p = 0.01;
+J_p = 0.02;
 
 % for N stage
 Jx1 = J_re+(R_r^2)/4/(R_c^2)*J_ce+N*(R_r^2)/4/(R_p^2)*J_p;
@@ -51,17 +51,15 @@ K_d = cos(theta_g)^2*r_g^2*(1/J_se+1/J_ce)+sin(theta_g)^2/m_slv;
 
 
 %% --------- collision ----------
-kesi = 0.3; %泊松恢复系数
-K_con = 3.0e5 ;
-D_con = 0e1;
-mu_con = 0.3;
-
+kesi = 0.6; %泊松恢复系数
+K_con = 2e6;
+D_con = 5e1;
+mu_con = 0.02;
+ n_colis = 0; % 碰撞次数统计
+ ddel0 = 1;
 sum_e = 0;
 last_e = 0;
 data_save=[];
-
-
-
 
 %%---------------------------phase 1 first free fly------------------------
 
@@ -72,15 +70,19 @@ data_save=[];
 
 p=3
  % s = [ x_slv theta_slv theta_sun v_slv omega_slv omega_sun ]
-s30=[0.0100055606876468	67.7720398413182	68.0678408277789	 0.000405227022490276	104.264676678951	104.719755119660];
+ % 初始角差为负数待定
+s30=[0.0100000000000000	68.0678408277789	68.0678408277789	4.64056155058707e-17	129.719755119660	104.719755119660];
 t30=0;
-t3f=0.1;
-
+t3f=0.2;
+% 
 options=@events3; %Create an optionsvariable
-% [t1,s1]=ode45(@phase1,[t10 t1f],s10,options);
 [t3,s3]=runge_kutta4(@phase_3,s30,1e-5,t30,t3f,options);
+
+% options=odeset('abstol',2.25*1e-14,'reltol',2.25*1e-14,'events',@events3);
+% [t3,s3]=ode89(@phase_3,[t30,t3f],s30,options);
+
 function [value,isterminal,direction]=events3(t3,s3)
-value=s3(1)-0.04; %Stops when s1(11)=1e-3
+value=s3(1)-0.022; %Stops when s1(11)=1e-3
 isterminal=1; %Stop after the first event (=0 to get all the events)
 direction=0; % No matter which direction (+ -> - or - -> +)
 % direction=-1;
@@ -98,7 +100,7 @@ co = [0 0 1;
 set(groot,'defaultAxesColorOrder',co);
 set(0,'DefaultLineLineWidth',1.5);
 %------------------------------Plots----------------------------------
-save test_p2
+save ./data/test_p3
 
 figure(1);
 subplot(4,1,1); %
@@ -128,6 +130,13 @@ text(t3(end),s3(end,5),'$$\ \omega_{slv} $$','FontSize',14,'Interpreter','latex'
 plot(t3,s3(:,6)); hold on;
 text(t3(end),s3(end,6),'$$\ \omega_{sun} $$','FontSize',14,'Interpreter','latex');
 
+% theta2pi
+% figure(3);
+% a = mod(s3(:,2)-s3(:,3),2*pi/N_h);
+% plot(t3,a); hold on;
+% text(t3(end),s3(end,3),'$$\ \theta/2pi*Nh $$','FontSize',14,'Interpreter','latex');
+% ylabel('$$\ (rad) $$','FontSize',12,'Interpreter','latex');
+
 
 % data_save=[data_save;t,delta,ddelta,F_slv,colis,(f_con*sin(theta_g)+F_con*sin(theta_g))*N_h,T_r,T_c];
 
@@ -143,8 +152,15 @@ subplot(4,2,5);plot(data_save(:,1),data_save(:,6));title("(f_con*sin(theta_g)+F_
 ylabel('$$\ (dm) $$','FontSize',12,'Interpreter','latex');
 subplot(4,2,6);plot(data_save(:,1),data_save(:,7));title("T_r");
 % subplot(3,1,3);plot(data_save(:,1),data_save(:,5));title("v");
-subplot(4,2,7);plot(data_save(:,1),data_save(:,8));title("T_s");
-
+subplot(4,2,7);plot(data_save(:,1),data_save(:,12));title("dd0");
+subplot(4,2,8);plot(data_save(:,1),data_save(:,11));title("F_con");
 
 xlabel('$$\ Time\,(s) $$','FontSize',12,'Interpreter','latex');
+
+
+figure(3);
+plot(data_save(:,1),mod(data_save(:,9)-data_save(:,10)-pi/N_h,pi*2/N_h)); hold on;
+line([data_save(1,1),data_save(end,1)],[pi/N_h,pi/N_h]);  hold on;
+
+
 end

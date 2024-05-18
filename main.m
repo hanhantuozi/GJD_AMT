@@ -1,4 +1,4 @@
-function mmain
+function main
 clc
 clear all
 close all
@@ -51,10 +51,10 @@ K_d = cos(theta_g)^2*r_g^2*(1/J_se+1/J_ce)+sin(theta_g)^2/m_slv;
 
 
 %% --------- collision ----------
-kesi = 0.3; %泊松恢复系数
-K_con = 1.07e7;
+kesi = 0.6; %泊松恢复系数
+K_con = 2e6;
 D_con = 1e2;
-mu_con = 0.3;
+mu_con = 0.02;
 
 sum_e = 0;
 data_save=[];
@@ -104,6 +104,42 @@ isterminal=0; %Stop after the first event (=0 to get all the events)
 direction=0; % No matter which direction (+ -> - or - -> +)
 % direction=-1;
 end
+
+%%-------------------------phase 4 Collision in High gear  -------------------------
+p=4
+ % s = [ x_slv theta_slv theta_sun v_slv omega_slv omega_sun ]
+s40=s3(end,:);
+t40=t3(end);
+t4f=0.18;
+
+
+% data_save=[data_save;t,delta,ddelta,F_slv,colis,N_cons*N_h,f_cons,T_r,T_s];
+options=@events4; %Create an optionsvariable
+% [t1,s1]=ode45(@phase1,[t10 t1f],s10,options);
+[t4,s4]=runge_kutta4(@phase_4,s40,1e-5,t40,t4f,options);
+
+function [value,isterminal,direction]=events4(t4,s4)
+value=(s4(6)-s4(5)); %Stops when s1(11)=1e-3
+isterminal=1; %Stop after the first event (=0 to get all the events)
+direction=0; % No matter which direction (+ -> - or - -> +)
+% direction=-1;
+end
+
+%%---------------------------phase 5 second shift and free fly------------------------
+p=5
+s50=s4(end,:);
+t50=t4(end);
+t5f=0.22;
+options=@events5;   % 一档状态空间方程
+[t5,s5]=runge_kutta4(@phase_5,s50,1e-4,t50,t5f,options);
+function [value,isterminal,direction]=events5(t5,s5)
+value=s5(1)-0.028;  %Stops when s5(1)=0.014
+isterminal=0;       %Stop after the first event (=0 to get all the events)
+direction=0;        % No matter which direction (+ -> - or - -> +)
+end
+
+
+
 %------------------------------Plots Set----------------------------------
 co = [0 0 1;
       1 0 0;
@@ -115,7 +151,7 @@ co = [0 0 1;
 set(groot,'defaultAxesColorOrder',co);
 set(0,'DefaultLineLineWidth',1.5);
 %------------------------------Plots----------------------------------
-save test_p1
+save ./data/test_p15
 
 
 figure(1);

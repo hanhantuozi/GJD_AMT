@@ -1,11 +1,11 @@
-function main_p1
+function main_p5
 clc
 clear all
 close all
 
 global m_slv J_se J_re J_ce J_p R_s R_r R_p R_c r_g P1 P2...
     c_slv theta_g N N_h k ig kesi K_con D_con mu_con Jx1 Jx2...
-    Jx3 Jx4 Jx Lrs1 Lrs2 Lrs3 Lrs4 Lcp1 Lcp2 Lcp3 Lcp4 K_d...
+    Jx3 Jx4 Jx Lrs5 Lrs2 Lrs3 Lrs4 Lcp1 Lcp2 Lcp3 Lcp4 K_d...
     data_save sum_e
 
 %% --------- geometry ---------
@@ -39,13 +39,13 @@ Jx2 = R_r*R_s/4/(R_c^2)*J_ce-N*R_r*R_s/4/(R_p^2)*J_p;
 Jx3 = Jx2;
 Jx4 = J_se+(R_s^2)/4/(R_c^2)*J_ce+N*(R_s^2)/4/(R_p^2)*J_p;
 Jx = [Jx1 Jx2;Jx3 Jx4];
-Lrs1 = Jx4/(Jx1*Jx4-Jx2^2);
+Lrs5 = Jx4/(Jx1*Jx4-Jx2^2);
 Lrs2 = -Jx2/(Jx1*Jx4-Jx2^2);
 Lrs3 = Lrs2;
 Lrs4 = Jx1/(Jx1*Jx4-Jx2^2);
-Lcp1 = (k*Lrs1+Lrs2)/(k+1);
+Lcp1 = (k*Lrs5+Lrs2)/(k+1);
 Lcp2 = (k*Lrs2+Lrs4)/(k+1);
-Lcp3 = (Lrs2-k*Lrs1)/(k-1);
+Lcp3 = (Lrs2-k*Lrs5)/(k-1);
 Lcp4 = (Lrs4-k*Lrs2)/(k-1);
 K_d = cos(theta_g)^2*r_g^2*(1/J_se+1/J_ce)+sin(theta_g)^2/m_slv;
 
@@ -58,17 +58,17 @@ mu_con = 0.3;
 
 sum_e = 0;
 data_save=[];
-s10=[0,0,0,0,995.654321*pi/30,1000*pi/30];
-t10=0; %Simulation starting time for phase 1
-t1f=0.05; %Simulation final time for phase 1
+s50=[0.0209836442884286	71.7523728815991	71.7473358383954	1.76916937870161	143.534791577338	143.563037274564];
+t50=0; %Simulation starting time for phase 1
+t5f=0.05; %Simulation final time for phase 1
 
-%%---------------------------phase 1 first free fly------------------------
-p=1
+%%---------------------------phase 5 second shift and free fly------------------------
+p=5
 
-options=@events1;   % 一档状态空间方程
-[t1,s1]=runge_kutta4(@phase_1,s10,1e-4,t10,t1f,options);
-function [value,isterminal,direction]=events1(t1,s1)
-value=s1(1)-0.014;  %Stops when s1(1)=0.014
+options=@events5;   % 一档状态空间方程
+[t5,s5]=runge_kutta4(@phase_5,s50,1e-4,t50,t5f,options);
+function [value,isterminal,direction]=events5(t5,s5)
+value=s5(1)-0.028;  %Stops when s5(1)=0.014
 isterminal=0;       %Stop after the first event (=0 to get all the events)
 direction=0;        % No matter which direction (+ -> - or - -> +)
 end
@@ -85,51 +85,51 @@ co = [0 0 1;
 set(groot,'defaultAxesColorOrder',co);
 set(0,'DefaultLineLineWidth',1.5);
 %------------------------------Plots----------------------------------
-save ./data/test_p1
+save ./data/test_p5
 
 
 figure(1);
 subplot(3,1,1); %
-plot(t1,s1(:,1)); hold on; 
-text(t1(end),s1(end,1)*30/pi,'$$\ x_{slv} $$','Interpreter','latex','FontSize',14);
+plot(t5,s5(:,1)); hold on; 
+text(t5(end),s5(end,1)*30/pi,'$$\ x_{slv} $$','Interpreter','latex','FontSize',14);
 ylabel('$$\ (m) $$','FontSize',12,'Interpreter','latex');
 title("P1 just shift in low gear")
 subplot(3,1,2);%
-plot(t1,s1(:,2)); hold on;
-text(t1(end),s1(end,2),'$$\ \theta_{slv} $$','FontSize',14,'Interpreter','latex');
+plot(t5,s5(:,2)); hold on;
+text(t5(end),s5(end,2),'$$\ \theta_{slv} $$','FontSize',14,'Interpreter','latex');
 
-plot(t1,s1(:,3)); hold on;
-text(t1(end),s1(end,3),'$$\ \theta_{sun} $$','FontSize',14,'Interpreter','latex');
+plot(t5,s5(:,3)); hold on;
+text(t5(end),s5(end,3),'$$\ \theta_{sun} $$','FontSize',14,'Interpreter','latex');
 ylabel('$$\ (rad) $$','FontSize',12,'Interpreter','latex');
 
 subplot(3,1,3);%
-plot(t1,s1(:,5)); hold on;
-text(t1(end),s1(end,5),'$$\ \omega_{slv} $$','FontSize',14,'Interpreter','latex');
+plot(t5,s5(:,5)); hold on;
+text(t5(end),s5(end,5),'$$\ \omega_{slv} $$','FontSize',14,'Interpreter','latex');
 
-plot(t1,s1(:,6)); hold on;
-text(t1(end),s1(end,6),'$$\ \omega_{sun} $$','FontSize',14,'Interpreter','latex');
+plot(t5,s5(:,6)); hold on;
+text(t5(end),s5(end,6),'$$\ \omega_{sun} $$','FontSize',14,'Interpreter','latex');
 
 
 % % figure(1);
 % subplot(3,1,1); %
-% plot(t1,s1(:,1)); hold on; 
-% text(t1(end),s1(end,1)*30/pi,'$$\ x_{slv} $$','Interpreter','latex','FontSize',14);
+% plot(t5,s5(:,1)); hold on; 
+% text(t5(end),s5(end,1)*30/pi,'$$\ x_{slv} $$','Interpreter','latex','FontSize',14);
 % ylabel('$$\ (m) $$','FontSize',12,'Interpreter','latex');
 % 
 % subplot(3,1,2);%
-% plot(t1,s1(:,2)); hold on;
-% text(t1(end),s1(end,2),'$$\ \theta_{slv} $$','FontSize',14,'Interpreter','latex');
+% plot(t5,s5(:,2)); hold on;
+% text(t5(end),s5(end,2),'$$\ \theta_{slv} $$','FontSize',14,'Interpreter','latex');
 % 
-% plot(t1,s1(:,3)); hold on;
-% text(t1(end),s1(end,3),'$$\ \theta_{sun} $$','FontSize',14,'Interpreter','latex');
+% plot(t5,s5(:,3)); hold on;
+% text(t5(end),s5(end,3),'$$\ \theta_{sun} $$','FontSize',14,'Interpreter','latex');
 % ylabel('$$\ (rad) $$','FontSize',12,'Interpreter','latex');
 % 
 % subplot(3,1,3);%
-% plot(t1,s1(:,5)); hold on;
-% text(t1(end),s1(end,5),'$$\ \omega_{slv} $$','FontSize',14,'Interpreter','latex');
+% plot(t5,s5(:,5)); hold on;
+% text(t5(end),s5(end,5),'$$\ \omega_{slv} $$','FontSize',14,'Interpreter','latex');
 % 
-% plot(t1,s1(:,6)); hold on;
-% text(t1(end),s1(end,6),'$$\ \omega_{sun} $$','FontSize',14,'Interpreter','latex');
+% plot(t5,s5(:,6)); hold on;
+% text(t5(end),s5(end,6),'$$\ \omega_{sun} $$','FontSize',14,'Interpreter','latex');
 
 %% collide plot
 
